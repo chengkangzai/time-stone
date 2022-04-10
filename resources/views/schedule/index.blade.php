@@ -100,7 +100,7 @@
                         <td>{{__('Linked to Microsoft ?')}} :</td>
                         <td>
                             @if(auth()->user()->msOauth()->exists())
-                                {{__('Yes')}}
+                                {{__('Yes')}} ({{auth()->user()->msOauth()->first()->userEmail}})
                             @else
                                 {{__('No')}}
                                 (<a href="{{route('msOAuth.signin')}}">

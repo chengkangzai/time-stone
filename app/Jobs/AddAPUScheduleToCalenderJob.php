@@ -75,7 +75,7 @@ class AddAPUScheduleToCalenderJob implements ShouldQueue
                 }
                 if (!$isEventCreatedBefore) {
                     $newEvent = $this->formatNewEvent($schedule, $attendees);
-//                    $this->syncCalendar($newEvent);
+                    $this->syncCalendar($newEvent);
                     $syncedSchedule->add($schedule);
                 }
             }
