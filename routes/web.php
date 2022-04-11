@@ -47,4 +47,3 @@ Route::middleware('auth')->group(function () {
     Route::get('msOAuth/callback', [MSOauthController::class, 'callback'])->name('msOAuth.callback');
     Route::resource('scheduleConfig', ScheduleConfigController::class);
 });
-

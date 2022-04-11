@@ -11,6 +11,7 @@ class HomeController extends Controller
     {
         $config = Auth::user()->scheduleConfig;
         $events = $config ? ApuSchedule::getSchedule($config->intake_code, $config->grouping, $config->except) : collect();
+
         return view('home', compact('events'));
     }
 }
