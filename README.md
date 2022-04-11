@@ -10,10 +10,10 @@
 - [Deployment](#deployment)
 - [Contributing](#contributing)
 
-##Introduction
+## Introduction
 This application is developed to help APU students to synchronize their timetable to their personal calendar that develop with Laravel Framework.
 
-##Installation
+## Installation
 To install the application, you need to install the following dependencies:
 - [Composer](https://getcomposer.org/)
 - [PHP](https://secure.php.net/)
@@ -27,13 +27,13 @@ Please follow the steps below to set up the application for OAUTH environment ke
 
 If you just want to use the application, you can refer to deployment section.
 
-##License
+## License
 This application is licensed under the GNU General Public License v3.0.
 For more detail, please refer to the [LICENSE](LICENSE) file.
 
-##Deployment
+## Deployment
 Deploy to Heroku
 - [Heroku](https://heroku.com) [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/monicahq/monica/tree/main)
 
-##Contributing
+## Contributing
 If you want to contribute to this application, you can refer to the [CONTRIBUTING](.github/CONTRIBUTING.md) file.
