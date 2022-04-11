@@ -13,10 +13,10 @@ class PaymentController extends Controller
     {
         $data = Validator::make($request->all(), [
             'price' => 'required|integer|gte:10',
-        ]);
+        ])->validate();
 
         $donate = Donate::create([
-            'price' => $data->price * 100,
+            'price' => $data['price'] * 100,
         ]);
 
         auth()->user()->payments()->create([
