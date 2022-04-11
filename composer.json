@@ -14,7 +14,8 @@
         "laravel/tinker": "^2.7",
         "laravel/ui": "^3.3",
         "league/oauth2-client": "^2.6",
-        "microsoft/microsoft-graph": "^1.46"
+        "microsoft/microsoft-graph": "^1.46",
+        "spatie/laravel-stripe-webhooks": "^3.1"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.5",

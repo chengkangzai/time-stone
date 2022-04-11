@@ -56,3 +56,4 @@ Route::middleware('auth')->group(function () {
 
 });
 
+Route::stripeWebhooks('/stripe/webhook');
