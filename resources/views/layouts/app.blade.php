@@ -73,15 +73,10 @@
             @yield('content')
         </div>
     </div>
-    {{--    <footer class="footer">--}}
-    {{--        <div><a href="https://coreui.io">CoreUI </a><a href="https://coreui.io">Bootstrap Admin Template</a> &copy; 2021--}}
-    {{--            creativeLabs.--}}
-    {{--        </div>--}}
-    {{--        <div class="ms-auto">Powered by&nbsp;<a href="https://coreui.io/bootstrap/ui-components/">CoreUI UI--}}
-    {{--                Components</a></div>--}}
-    {{--    </footer>--}}
+    @include('partial.success-card')
 </div>
 <script src="{{ asset('js/coreui.bundle.min.js') }}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 @stack('script')
 <script>
     []

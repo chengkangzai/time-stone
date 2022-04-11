@@ -13,4 +13,11 @@ class HomeController extends Controller
         $events = $config ? ApuSchedule::getSchedule($config->intake_code, $config->grouping, $config->except) : collect();
         return view('home', compact('events'));
     }
+
+    public function about()
+    {
+        $paymentIntent = auth()->user()->createSetupIntent();
+
+        return view('about', compact('paymentIntent'));
+    }
 }

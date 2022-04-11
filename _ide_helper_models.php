@@ -12,6 +12,26 @@
 
 namespace App\Models{
 /**
+ * App\Models\Donate
+ *
+ * @property int $id
+ * @property int $price
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Payment|null $payments
+ * @method static \Illuminate\Database\Eloquent\Builder|Donate newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Donate newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Donate query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Donate whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donate whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donate wherePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Donate whereUpdatedAt($value)
+ */
+	class Donate extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
  * App\Models\MicrosoftOAuth
  *
  * @property int $id
@@ -40,6 +60,33 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|MicrosoftOAuth whereUserTimeZone($value)
  */
 	class MicrosoftOAuth extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\Payment
+ *
+ * @property int $id
+ * @property int $user_id
+ * @property int $donate_id
+ * @property int $price
+ * @property \Illuminate\Support\Carbon|null $paid_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Donate $donate
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|Payment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Payment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Payment query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Payment whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Payment whereDonateId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Payment whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Payment wherePaidAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Payment wherePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Payment whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Payment whereUserId($value)
+ */
+	class Payment extends \Eloquent {}
 }
 
 namespace App\Models{
@@ -85,10 +132,18 @@ namespace App\Models{
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $stripe_id
+ * @property string|null $pm_type
+ * @property string|null $pm_last_four
+ * @property string|null $trial_ends_at
  * @property-read \App\Models\MicrosoftOAuth|null $msOauth
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
  * @property-read int|null $notifications_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Payment[] $payments
+ * @property-read int|null $payments_count
  * @property-read \App\Models\ScheduleConfig|null $scheduleConfig
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Laravel\Cashier\Subscription[] $subscriptions
+ * @property-read int|null $subscriptions_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\Laravel\Sanctum\PersonalAccessToken[] $tokens
  * @property-read int|null $tokens_count
  * @method static \Database\Factories\UserFactory factory(...$parameters)
@@ -101,7 +156,11 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|User whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User wherePassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User wherePmLastFour($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User wherePmType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereRememberToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereStripeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereTrialEndsAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
  */
 	class User extends \Eloquent {}
