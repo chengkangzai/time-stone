@@ -12,8 +12,6 @@
             <li class="breadcrumb-item active" aria-current="page">{{__('Schedule')}}</li>
         </ol>
     </nav>
-    @include('partial.success-card')
-    @include('partial.error-card')
 
     @if(!$config)
         <div class="card">

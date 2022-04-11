@@ -8,12 +8,14 @@
         "php": "^8.0.2",
         "chengkangzai/laravel-apu-schedule": "^2.0.0",
         "guzzlehttp/guzzle": "^7.2",
+        "laravel/cashier": "^13.8",
         "laravel/framework": "^9.2",
         "laravel/sanctum": "^2.14.1",
         "laravel/tinker": "^2.7",
         "laravel/ui": "^3.3",
         "league/oauth2-client": "^2.6",
-        "microsoft/microsoft-graph": "^1.46"
+        "microsoft/microsoft-graph": "^1.46",
+        "spatie/laravel-stripe-webhooks": "^3.1"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.5",

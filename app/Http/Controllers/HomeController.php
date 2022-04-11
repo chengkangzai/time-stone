@@ -14,4 +14,9 @@ class HomeController extends Controller
 
         return view('home', compact('events'));
     }
+
+    public function about()
+    {
+        return view('about');
+    }
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MSOauthController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ScheduleConfigController;
 use App\Http\Controllers\UserController;
@@ -33,7 +34,7 @@ Route::get('unsubscribe/{email}', function ($email) {
 })->name('unsubscribe')->middleware('signed');
 
 Route::middleware('auth')->group(function () {
-    Route::view('about', 'about')->name('about');
+    Route::get('about', [HomeController::class, 'about'])->name('about');
     Route::get('users', [UserController::class, 'index'])->name('users.index');
     Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -46,4 +47,12 @@ Route::middleware('auth')->group(function () {
     Route::get('msOAuth', [MSOauthController::class, 'signin'])->name('msOAuth.signin');
     Route::get('msOAuth/callback', [MSOauthController::class, 'callback'])->name('msOAuth.callback');
     Route::resource('scheduleConfig', ScheduleConfigController::class);
+
+    Route::group(['prefix' => 'payment', 'as' => 'payments.'], function () {
+        Route::post('confirm', [PaymentController::class, 'confirm'])->name('confirm');
+        Route::get('checkout', [PaymentController::class, 'checkout'])->name('checkout');
+        Route::post('pay', [PaymentController::class, 'pay'])->name('pay');
+    });
 });
+
+Route::stripeWebhooks('/stripe/webhook');
