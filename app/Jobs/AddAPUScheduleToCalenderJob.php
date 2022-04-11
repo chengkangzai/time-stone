@@ -28,9 +28,12 @@ use Notification;
 
 class AddAPUScheduleToCalenderJob implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
-    const CAUSED_BY = [
+    public const CAUSED_BY = [
         'Console' => 'Console',
         'Web' => 'Web',
     ];
@@ -59,10 +62,12 @@ class AddAPUScheduleToCalenderJob implements ShouldQueue, ShouldBeUnique
 
             $syncedSchedule = ApuSchedule::getSchedule($this->config->intake_code, $this->config->grouping, $this->config->except)
                 ->map(function ($schedule) {
-                    if (!$this->isEventCreatedBefore($schedule)) {
+                    if (! $this->isEventCreatedBefore($schedule)) {
                         $this->syncCalendar($schedule);
+
                         return $schedule;
                     }
+
                     return null;
                 })
                 ->filter();
@@ -76,7 +81,7 @@ class AddAPUScheduleToCalenderJob implements ShouldQueue, ShouldBeUnique
     private function getAttendees(array $attendeeAddresses): array
     {
         return collect($attendeeAddresses)
-            ->map(fn($add) => ['emailAddress' => ['address' => $add], 'type' => 'required'])
+            ->map(fn ($add) => ['emailAddress' => ['address' => $add], 'type' => 'required'])
             ->toArray();
     }
 
@@ -100,16 +105,16 @@ class AddAPUScheduleToCalenderJob implements ShouldQueue, ShouldBeUnique
             'attendees' => $this->getAttendees(explode(';', $this->user->email)),
             'start' => [
                 'dateTime' => $schedule->TIME_FROM_ISO,
-                'timeZone' => $this->timeZone
+                'timeZone' => $this->timeZone,
             ],
             'end' => [
                 'dateTime' => $schedule->TIME_TO_ISO,
-                'timeZone' => $this->timeZone
+                'timeZone' => $this->timeZone,
             ],
             'body' => [
                 'content' => $this->getEventBodyContent($schedule),
-                'contentType' => 'text'
-            ]
+                'contentType' => 'text',
+            ],
         ];
     }
 
@@ -127,7 +132,7 @@ class AddAPUScheduleToCalenderJob implements ShouldQueue, ShouldBeUnique
             'endDateTime' => Carbon::now()->addMonth()->format(DateTimeInterface::ISO8601),
             '$select' => 'subject,organizer,start,end',
             '$orderby' => 'start/dateTime',
-            '$top' => 50
+            '$top' => 50,
         ];
 
         $getEventsUrl = '/me/calendarView?' . http_build_query($query);
