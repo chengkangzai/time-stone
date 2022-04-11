@@ -21,12 +21,11 @@ class ThanksForDonationNotification extends Notification
 
     public function toMail($notifiable): MailMessage
     {
-        return (new MailMessage)
+        return (new MailMessage())
             ->line('Thank you for your donation!')
             ->line('This is a notification to let you know that your donation has been received')
             ->action('View Receipt', $this->receiptUrl)
             ->line('Best wishes.');
-
     }
 
     public function toArray($notifiable): array

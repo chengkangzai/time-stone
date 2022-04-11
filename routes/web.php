@@ -53,7 +53,6 @@ Route::middleware('auth')->group(function () {
         Route::get('checkout', [PaymentController::class, 'checkout'])->name('checkout');
         Route::post('pay', [PaymentController::class, 'pay'])->name('pay');
     });
-
 });
 
 Route::stripeWebhooks('/stripe/webhook');
