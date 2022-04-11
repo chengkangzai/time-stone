@@ -16,7 +16,7 @@ class PaymentController extends Controller
         ]);
 
         $donate = Donate::create([
-            'price' => $data->price * 100
+            'price' => $data->price * 100,
         ]);
 
         auth()->user()->payments()->create([
