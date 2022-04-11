@@ -1,0 +1,97 @@
+{
+    "name": "Timestone",
+    "description": "A Web Application that sync the APU time table to your calendar",
+    "repository": "https://github.com/chengkangzai/time-sone",
+    "logo": "https://github.com/chengkangzai/time-stone/blob/master/public/favicon.png?raw=true",
+    "keywords": [
+        "Synchronisation",
+        "Time Table",
+        "APU",
+        "Calendar"
+    ],
+    "buildpacks": [
+        {
+            "url": "heroku/php"
+        },
+        {
+            "url": "heroku/nodejs"
+        }
+    ],
+    "addons": [
+        {
+            "plan": "jawsdb:kitefin"
+        },
+        {
+            "plan": "scheduler:standard"
+        }
+    ],
+    "scripts": {
+        "postdeploy": ""
+    },
+    "env": {
+        "APP_KEY": {
+            "description": "Please change this to a 32-character string. For example run `echo -n 'base64:'; openssl rand -base64 32` and copy/paste the value.",
+            "value": "change-me-to-a-random-string----"
+        },
+        "APP_URL": {
+            "description": "Please change this to your Heroku app's domain.",
+            "value": "https://XXX.herokuapp.com"
+        },
+        "APP_ENV": {
+            "description": "Use timestone in 'production' mode, or set it to 'local' if you want to install timestone as a development version.",
+            "value": "production"
+        },
+        "APP_DEBUG": {
+            "description": "Enables or disables debug mode.",
+            "value": "false"
+        },
+        "DB_CONNECTION": {
+            "description": "Tells the application to use Heroku's database connection.",
+            "value": "heroku"
+        },
+        "HEROKU": {
+            "description": "Tells the application this application is hosted on Heroku.",
+            "value": "true"
+        },
+        "OAUTH_APP_ID": {
+            "description": "Microsoft Oauth ID",
+            "value": ""
+        },
+        "OAUTH_APP_SECRET": {
+            "description": "Microsoft Oauth Secret",
+            "value": ""
+        },
+        "OAUTH_REDIRECT_URI": {
+            "description": "Microsoft Oauth Redirect URI",
+            "value": "https://replace-your-heroku-id-here.herokuapp.com/auth/callback"
+        },
+        "MAIL_MAILER": {
+            "description": "Default mailer that is used to send any email",
+            "value": ""
+        },
+        "MAIL_HOST":{
+            "description": "SMTP host of your mail server",
+            "value": ""
+        },
+        "MAIL_PORT": {
+            "description": "SMTP port of your SMTP server",
+            "value": ""
+        },
+        "MAIL_USERNAME":{
+            "description": "SMTP username of your SMTP server, usually your email address",
+            "value": ""
+        },
+        "MAIL_PASSWORD": {
+            "description": "SMPT password of your SMTP server, usually your email password",
+            "value": ""
+        },
+        "MAIL_ENCRYPTION":{
+            "description": "The encryption method of your SMTP server, usually 'tls' or 'ssl'",
+            "value": ""
+        },
+        "MAIL_FROM_ADDRESS": {
+            "description": "Tht email address that will be used as the sender of the email, usually your email address",
+            "value": ""
+        }
+    }
+}

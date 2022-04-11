@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>{{ config('app.name', 'Laravel') }}</title>
     <meta name="theme-color" content="#ffffff">
+    <link rel="icon" href="{{asset('favicon.png')}}" type="image/png">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>

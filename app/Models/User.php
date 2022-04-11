@@ -50,6 +50,6 @@ class User extends Authenticatable
 
     public function msOauth(): HasOne
     {
-        return $this->hasOne(MicrosoftOauth::class);
+        return $this->hasOne(MicrosoftOAuth::class);
     }
 }

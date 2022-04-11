@@ -2,19 +2,18 @@
 
 namespace App\Jobs;
 
-use App\Services\MicrosoftGraphService;
-use App\Services\TimeZoneService;
 use App\Models\ScheduleConfig;
 use App\Models\User;
 use App\Notifications\CalendarSyncSuccessNotification;
+use App\Services\MicrosoftGraphService;
+use App\Services\TimeZoneService;
 use Carbon\Carbon;
 use Chengkangzai\ApuSchedule\ApuSchedule;
-use DateTimeImmutable;
 use DateTimeInterface;
-use DateTimeZone;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -27,7 +26,7 @@ use Microsoft\Graph\Graph as MicrosoftGraph;
 use Microsoft\Graph\Model;
 use Notification;
 
-class AddAPUScheduleToCalenderJob implements ShouldQueue
+class AddAPUScheduleToCalenderJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -39,46 +38,34 @@ class AddAPUScheduleToCalenderJob implements ShouldQueue
     private MicrosoftGraph $graph;
     private User $user;
     private ScheduleConfig $config;
-    private ?string $causeBy;
+    private string $causeBy;
+    /** @var Model\Event[] */
+    public array $events;
+    private string $timeZone;
 
-    public function __construct(User $user, ScheduleConfig $config, string|null $causeBy)
+    public function __construct(User $user, ScheduleConfig $config, string $causeBy)
     {
-        $graphService = new MicrosoftGraphService();
-        $this->graph = $graphService->getGraph($user);
+        $this->graph = (new MicrosoftGraphService())->getGraph($user);
         $this->user = $user;
         $this->config = $config;
         $this->causeBy = $causeBy;
+        $this->timeZone = TimeZoneService::$timeZoneMap['Singapore Standard Time'];
     }
 
     public function handle()
     {
-        $attendeeAddresses = explode(';', $this->user->email);
-        $attendees = $this->getAttendees($attendeeAddresses);
-        $schedules = ApuSchedule::getSchedule($this->config->intake_code, $this->config->grouping, $this->config->except);
-
         try {
-            $events = $this->getEvent();
-            $syncedSchedule = collect();
-            foreach ($schedules as $schedule) {
-                $isEventCreatedBefore = false;
-                foreach ($events as $event) {
-                    $eventStart = Carbon::parse($event->getStart()->getDateTime())->format(DateTimeInterface::ISO8601);
-                    $eventEnd = Carbon::parse($event->getEnd()->getDateTime())->format(DateTimeInterface::ISO8601);
+            $this->events = $this->getEvent();
 
-                    $scheduleStart = Carbon::parse($schedule->TIME_FROM_ISO)->format(DateTimeInterface::ISO8601);
-                    $scheduleEnd = Carbon::parse($schedule->TIME_TO_ISO)->format(DateTimeInterface::ISO8601);
-
-                    if ($eventStart == $scheduleStart && $eventEnd == $scheduleEnd) {
-                        $isEventCreatedBefore = true;
-                        break;
+            $syncedSchedule = ApuSchedule::getSchedule($this->config->intake_code, $this->config->grouping, $this->config->except)
+                ->map(function ($schedule) {
+                    if (!$this->isEventCreatedBefore($schedule)) {
+                        $this->syncCalendar($schedule);
+                        return $schedule;
                     }
-                }
-                if (!$isEventCreatedBefore) {
-                    $newEvent = $this->formatNewEvent($schedule, $attendees);
-//                    $this->syncCalendar($newEvent);
-                    $syncedSchedule->add($schedule);
-                }
-            }
+                    return null;
+                })
+                ->filter();
 
             Notification::send($this->user, new CalendarSyncSuccessNotification($this->config, $syncedSchedule));
         } catch (GuzzleException|GraphException|Exception $e) {
@@ -88,90 +75,110 @@ class AddAPUScheduleToCalenderJob implements ShouldQueue
 
     private function getAttendees(array $attendeeAddresses): array
     {
-        $attendees = [];
-        foreach ($attendeeAddresses as $attendeeAddress) {
-            $attendees[] = [
-                'emailAddress' => [
-                    'address' => $attendeeAddress
-                ],
-                'type' => 'required'
-            ];
-        }
-        return $attendees;
+        return collect($attendeeAddresses)
+            ->map(fn($add) => ['emailAddress' => ['address' => $add], 'type' => 'required'])
+            ->toArray();
     }
 
     /**
      * @throws GraphException
      * @throws GuzzleException
      */
-    private function syncCalendar(array $newEvent)
+    private function syncCalendar($schedule)
     {
         $this->graph->createRequest('POST', '/me/events')
-            ->attachBody($newEvent)
+            ->attachBody($this->formatNewEvent($schedule))
             ->setReturnType(Model\Event::class)
             ->execute();
     }
 
     #[ArrayShape(['subject' => "", 'attendees' => "array", 'start' => "array", 'end' => "array", 'body' => "string[]"])]
-    private function formatNewEvent($schedule, array $attendees): array
+    private function formatNewEvent($schedule): array
     {
         return [
             'subject' => $schedule->MODID,
-            'attendees' => $attendees,
+            'attendees' => $this->getAttendees(explode(';', $this->user->email)),
             'start' => [
                 'dateTime' => $schedule->TIME_FROM_ISO,
-                'timeZone' => TimeZoneService::$timeZoneMap['Singapore Standard Time']
+                'timeZone' => $this->timeZone
             ],
             'end' => [
                 'dateTime' => $schedule->TIME_TO_ISO,
-                'timeZone' => TimeZoneService::$timeZoneMap['Singapore Standard Time']
+                'timeZone' => $this->timeZone
             ],
             'body' => [
-                'content' =>
-                    "Hi," . $this->user->name . ", you have a class of $schedule->MODULE_NAME with lecturer $schedule->NAME ($schedule->SAMACCOUNTNAME@staffemail.apu.edu.my)" .
-                    " at $schedule->ROOM from $schedule->TIME_FROM to $schedule->TIME_TO \n" .
-                    ($this->causeBy == self::CAUSED_BY['Console'] ?
-                        "Sync Schedule will run every Saturday at 06:00 AM (GMT+8 Malaysia Timezone).\n" .
-                        "To unsubscribe, please click on the link below: \n" .
-                        URL::signedRoute('public.unsubscribe', ['email' => $this->user->email]) : ''
-                    ),
+                'content' => $this->getEventBodyContent($schedule),
                 'contentType' => 'text'
             ]
         ];
     }
 
     /**
-     * @throws GraphException
+     * @return Model\Event[]
      * @throws GuzzleException
      * @throws Exception
+     *
+     * @throws GraphException
      */
     private function getEvent(): array
     {
-        $timezone = new DateTimeZone(TimeZoneService::$timeZoneMap["Singapore Standard Time"]);
-
-        // Get start and end of week
-        $startOfWeek = new DateTimeImmutable('sunday -4 week', $timezone);
-        $endOfWeek = new DateTimeImmutable('sunday +4 week', $timezone);
-
-        $queryParams = array(
-            'startDateTime' => $startOfWeek->format(DateTimeInterface::ISO8601),
-            'endDateTime' => $endOfWeek->format(DateTimeInterface::ISO8601),
-            // Only request the properties used by the app
+        $query = [
+            'startDateTime' => Carbon::now()->subMonth()->format(DateTimeInterface::ISO8601),
+            'endDateTime' => Carbon::now()->addMonth()->format(DateTimeInterface::ISO8601),
             '$select' => 'subject,organizer,start,end',
-            // Sort them by start time
             '$orderby' => 'start/dateTime',
-            // Limit results to 25
             '$top' => 50
-        );
+        ];
 
-        // Append query parameters to the '/me/calendarView' url
-        $getEventsUrl = '/me/calendarView?' . http_build_query($queryParams);
+        $getEventsUrl = '/me/calendarView?' . http_build_query($query);
 
         return $this->graph->createRequest('GET', $getEventsUrl)
-            // Add the user's timezone to the Prefer header
-            ->addHeaders(array(
-                'Prefer' => 'outlook.timezone="' . TimeZoneService::$timeZoneMap["Singapore Standard Time"] . '"'
-            ))
+            ->addHeaders(['Prefer' => 'outlook.timezone="' . $this->timeZone . '"'])
+            ->setReturnType(Model\Event::class)
+            ->execute();
+    }
+
+    private function isEventCreatedBefore($schedule): bool
+    {
+        return collect($this->events)
+            ->filter(function (Model\Event $event) use ($schedule) {
+                $eventStart = Carbon::parse($event->getStart()->getDateTime());
+                $eventEnd = Carbon::parse($event->getEnd()->getDateTime());
+
+                $scheduleStart = Carbon::parse($schedule->TIME_FROM_ISO);
+                $scheduleEnd = Carbon::parse($schedule->TIME_TO_ISO);
+
+                return $this->isSameTimeAndDay($eventStart, $scheduleStart)
+                    && $this->isSameTimeAndDay($eventEnd, $scheduleEnd);
+            })
+            ->isNotEmpty();
+    }
+
+    private function getEventBodyContent($schedule): string
+    {
+        return collect("Hi,{$this->user->name} , you have a class of $schedule->MODULE_NAME with lecturer $schedule->NAME ($schedule->SAMACCOUNTNAME@staffemail.apu.edu.my) at $schedule->ROOM from $schedule->TIME_FROM to $schedule->TIME_TO")
+            ->map(function ($content) {
+                if ($this->causeBy === self::CAUSED_BY['Console']) {
+                    $content->add("This is an automated message from " . config('app.name') . ".");
+                    $content->add("To unsubscribe, please click on the following link: " . URL::signedRoute('unsubscribe', ['email' => $this->user->email]));
+                }
+            })
+            ->implode("\n");
+    }
+
+    private function isSameTimeAndDay(Carbon $time1, Carbon $time2): bool
+    {
+        return $time1->day === $time2->day && $time1->hour === $time2->hour && $time1->minute === $time2->minute;
+    }
+
+    /**
+     * Keep this, this is will make your life easier
+     * @throws GuzzleException
+     * @throws GraphException
+     */
+    private function removeEvent(Model\Event $event)
+    {
+        $this->graph->createRequest('DELETE', "/me/events/{$event->getId()}")
             ->setReturnType(Model\Event::class)
             ->execute();
     }

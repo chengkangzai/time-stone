@@ -5,6 +5,7 @@ use App\Http\Controllers\MSOauthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ScheduleConfigController;
 use App\Http\Controllers\UserController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,6 +26,11 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+Route::get('unsubscribe/{email}', function ($email) {
+    User::where('email', $email)->firstOrFail()->scheduleConfig()->firstOrFail()->updateOrFail(['is_subscribed' => false]);
+    echo "You have been successfully unsubscribe";
+})->name('unsubscribe')->middleware('signed');
 
 Route::middleware('auth')->group(function () {
     Route::view('about', 'about')->name('about');

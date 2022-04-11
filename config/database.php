@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Str;
 
-return [
+$db = [
 
     /*
     |--------------------------------------------------------------------------
@@ -125,7 +125,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
         ],
 
         'default' => [
@@ -149,3 +149,30 @@ return [
     ],
 
 ];
+
+/*
+ * If the instance is hosted on Heroku, then the database information
+ * needs to be parsed from the environment variable provided by Heroku.
+ * This is done below, added to the $db variable and then returned.
+ */
+if (env('HEROKU')) {
+    $url = parse_url(env('JAWSDB_URL', env('CLEARDB_DATABASE_URL')));
+
+    $db['connections']['heroku'] = [
+        'driver' => 'mysql',
+        'host' => $url['host'],
+        'database' => Str::startsWith($url['path'], '/') ? Str::after($url['path'], '/') : $url['path'],
+        'username' => $url['user'],
+        'password' => $url['pass'],
+        'charset' => env('DB_USE_UTF8MB4', true) ? 'utf8mb4' : 'utf8',
+        'collation' => env('DB_USE_UTF8MB4', true) ? 'utf8mb4_unicode_ci' : 'utf8_unicode_ci',
+        'prefix' => env('DB_PREFIX', ''),
+        'strict' => false,
+        'schema' => 'public',
+    ];
+    if (array_key_exists('port', $url)) {
+        $db['connections']['heroku']['port'] = $url['port'];
+    }
+}
+
+return $db;
