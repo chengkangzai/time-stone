@@ -16,8 +16,6 @@ class HomeController extends Controller
 
     public function about()
     {
-        $paymentIntent = auth()->user()->createSetupIntent();
-
-        return view('about', compact('paymentIntent'));
+        return view('about');
     }
 }

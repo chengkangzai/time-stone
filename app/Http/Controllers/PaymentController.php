@@ -5,13 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Donate;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Validator;
 
 class PaymentController extends Controller
 {
     public function confirm(Request $request)
     {
+        $data = Validator::make($request->all(), [
+            'price' => 'required|integer|gte:10',
+        ]);
+
         $donate = Donate::create([
-            'price' => $request->price * 100,
+            'price' => $data->price * 100
         ]);
 
         auth()->user()->payments()->create([
