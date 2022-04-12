@@ -21,7 +21,7 @@ class PaymentController extends Controller
     {
         [$payment, $paymentIntent] = $action->execute(auth()->user());
 
-        return view('checkout', compact('payment', 'paymentIntent'));
+        return view('payments.checkout', compact('payment', 'paymentIntent'));
     }
 
     public function pay(Request $request, PayForDonation $action)
@@ -29,7 +29,7 @@ class PaymentController extends Controller
         try {
             $action->execute($request->input('payment_id'), $request->input('payment_method'));
 
-            return redirect()->route('about')->with('success', 'Payment Successful, Thank you for your donation!');
+            return redirect()->route('about')->with('success', __('Payment Successful, Thank you for your donation!'));
         } catch (Exception $ex) {
             return back()->with('error', $ex->getMessage());
         }
