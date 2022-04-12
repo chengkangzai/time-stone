@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\AddAPUScheduleToCalenderJob;
+use App\Jobs\Schedule\AddAPUScheduleToCalenderJob;
 use App\Models\ScheduleConfig;
 use Auth;
 use Chengkangzai\ApuSchedule\ApuSchedule;

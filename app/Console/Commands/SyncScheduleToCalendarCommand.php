@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\AddAPUScheduleToCalenderJob;
+use App\Jobs\Schedule\AddAPUScheduleToCalenderJob;
 use App\Models\ScheduleConfig;
 use Illuminate\Console\Command;
 
