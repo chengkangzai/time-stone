@@ -28,7 +28,7 @@ class MicrosoftGraphService
         /** @var MicrosoftOAuth $token */
         $token = $user->msOauth()->first();
 
-        if (!$token->expired()) {
+        if (! $token->expired()) {
             return $token->accessToken;
         }
 

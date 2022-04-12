@@ -41,7 +41,7 @@ class MsScheduleToCalendarJob extends SyncScheduleToCalendar
 
             $syncedSchedule = ApuSchedule::getSchedule($this->config->intake_code, $this->config->grouping, $this->config->except)
                 ->map(function ($schedule) {
-                    if (!$this->isEventCreatedBefore($schedule)) {
+                    if (! $this->isEventCreatedBefore($schedule)) {
                         $this->syncCalendar($schedule);
 
                         return $schedule;
@@ -60,7 +60,7 @@ class MsScheduleToCalendarJob extends SyncScheduleToCalendar
     protected function getAttendees(array $attendeeAddresses): array
     {
         return collect($attendeeAddresses)
-            ->map(fn($add) => ['emailAddress' => ['address' => $add], 'type' => 'required'])
+            ->map(fn ($add) => ['emailAddress' => ['address' => $add], 'type' => 'required'])
             ->toArray();
     }
 

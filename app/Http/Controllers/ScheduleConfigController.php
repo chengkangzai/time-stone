@@ -62,5 +62,4 @@ class ScheduleConfigController extends Controller
 
         return response()->json($groupings);
     }
-
 }
