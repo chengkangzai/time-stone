@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\AddAPUScheduleToCalenderJob;
+use App\Jobs\Schedule\MSScheduleToCalendarJob;
 use App\Models\ScheduleConfig;
 use Auth;
 use Chengkangzai\ApuSchedule\ApuSchedule;
@@ -51,7 +51,7 @@ class ScheduleConfigController extends Controller
             'intake_code' => 'required|string',
             'grouping' => 'required|string',
             'is_subscribed' => 'sometimes|boolean',
-            'except' => 'sometimes|string',
+            'except' => 'sometimes|array',
         ])
             ->validate();
 
@@ -70,7 +70,7 @@ class ScheduleConfigController extends Controller
         if (! auth()->user()->msOauth()->exists()) {
             return redirect()->route('scheduleConfig.index')->withErrors(__('Please link your microsoft account first'));
         }
-        AddAPUScheduleToCalenderJob::dispatch(auth()->user(), $config, AddAPUScheduleToCalenderJob::CAUSED_BY['Web']);
+        MSScheduleToCalendarJob::dispatch(auth()->user(), $config, MSScheduleToCalendarJob::CAUSED_BY['Web']);
 
         return redirect()->route('scheduleConfig.index')->with('success', __('Schedule has been queued for sync, it will take a few minutes'));
     }
