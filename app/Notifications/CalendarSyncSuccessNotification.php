@@ -57,9 +57,11 @@ class CalendarSyncSuccessNotification extends Notification implements ShouldQueu
         if ($this->calendarEvents->isEmpty()) {
             $mail->line('No events were created.');
             $mail->line('');
-            $mail->line('Quite possibly, there are no events published from APU.');
+            $mail->line('Quite possibly, there are no events published from APU or you dont have class.');
             $mail->line('If there is schedule in APSpace, please check the schedule settings.');
         }
+
+        $mail->line('Happy Study!');
 
         return $mail;
     }
