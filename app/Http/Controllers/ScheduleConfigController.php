@@ -67,7 +67,7 @@ class ScheduleConfigController extends Controller
     public function syncNow(): RedirectResponse
     {
         $config = Auth::user()->scheduleConfig;
-        if (!auth()->user()->msOauth()->exists()) {
+        if (! auth()->user()->msOauth()->exists()) {
             return redirect()->route('scheduleConfig.index')->withErrors(__('Please link your microsoft account first'));
         }
         AddAPUScheduleToCalenderJob::dispatch(auth()->user(), $config, AddAPUScheduleToCalenderJob::CAUSED_BY['Web']);
