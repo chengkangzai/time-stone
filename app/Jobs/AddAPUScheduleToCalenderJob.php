@@ -62,7 +62,7 @@ class AddAPUScheduleToCalenderJob implements ShouldQueue, ShouldBeUnique
 
             $syncedSchedule = ApuSchedule::getSchedule($this->config->intake_code, $this->config->grouping, $this->config->except)
                 ->map(function ($schedule) {
-                    if (! $this->isEventCreatedBefore($schedule)) {
+                    if (!$this->isEventCreatedBefore($schedule)) {
                         $this->syncCalendar($schedule);
 
                         return $schedule;
@@ -81,7 +81,7 @@ class AddAPUScheduleToCalenderJob implements ShouldQueue, ShouldBeUnique
     private function getAttendees(array $attendeeAddresses): array
     {
         return collect($attendeeAddresses)
-            ->map(fn ($add) => ['emailAddress' => ['address' => $add], 'type' => 'required'])
+            ->map(fn($add) => ['emailAddress' => ['address' => $add], 'type' => 'required'])
             ->toArray();
     }
 
@@ -159,14 +159,14 @@ class AddAPUScheduleToCalenderJob implements ShouldQueue, ShouldBeUnique
             ->isNotEmpty();
     }
 
-    private function getEventBodyContent($schedule): string
+    public function getEventBodyContent($schedule): string
     {
-        return collect("Hi,{$this->user->name} , you have a class of $schedule->MODULE_NAME with lecturer $schedule->NAME ($schedule->SAMACCOUNTNAME@staffemail.apu.edu.my) at $schedule->ROOM from $schedule->TIME_FROM to $schedule->TIME_TO")
-            ->map(function ($content) {
-                if ($this->causeBy === self::CAUSED_BY['Console']) {
-                    $content->add("This is an automated message from " . config('app.name') . ".");
-                    $content->add("To unsubscribe, please click on the following link: " . URL::signedRoute('unsubscribe', ['email' => $this->user->email]));
-                }
+        return collect("Hi, {$this->user->name}, you have a class of $schedule->MODULE_NAME.")
+            ->add("The class is from $schedule->TIME_FROM to $schedule->TIME_TO at $schedule->ROOM ")
+            ->add("The lecturer is $schedule->NAME ($schedule->SAMACCOUNTNAME@staffemail.apu.edu.my)")
+            ->when($this->causeBy === self::CAUSED_BY['Console'], function ($content) {
+                $content->add("This is an automated message from " . config('app.name') . ".");
+                $content->add("To unsubscribe, please click on the following link: " . URL::signedRoute('unsubscribe', ['email' => $this->user->email]));
             })
             ->implode("\n");
     }
