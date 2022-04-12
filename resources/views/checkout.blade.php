@@ -1,5 +1,5 @@
 @php
-    /** @var \App\Models\Payment $payment */
+/** @var \App\Models\Payment $payment */
 @endphp
 @extends('layouts.app')
 
@@ -9,13 +9,13 @@
             {{ __('Donate') }}
         </div>
         <div class="card-body">
-            <p>{{__('Its not easy to develop and maintain this web application, donation is deeply appreciated.')}}</p>
+            <p>{{ __('Its not easy to develop and maintain this web application, donation is deeply appreciated.') }}</p>
             <div class="alert alert-danger d-none" id="card-error">
             </div>
             <form action="{{ route('payments.pay') }}" method="POST" id="payment-form">
                 @csrf
-                <input type="hidden" name="payment_method" id="payment-method" value=""/>
-                <input type="hidden" name="payment_id" value="{{ $payment->id }}"/>
+                <input type="hidden" name="payment_method" id="payment-method" value="" />
+                <input type="hidden" name="payment_id" value="{{ $payment->id }}" />
                 <div class="col-md-6">
                     <div id="card-element"></div>
                     <button type="button" class="mt-4 btn btn-primary" id="payment-button">
@@ -33,9 +33,9 @@
 @push('script')
     <script src="https://js.stripe.com/v3/"></script>
     <script>
-        const stripe = Stripe('{{config('services.stripe.key')}}');
+        const stripe = Stripe('{{ config('services.stripe.key') }}');
         const elements = stripe.elements({
-            locale: '{{app()->getLocale()}}',
+            locale: '{{ app()->getLocale() }}',
         });
 
         //create an instance of the card Element that look like bootstrap form
@@ -53,7 +53,7 @@
         });
         cardElement.mount('#card-element');
 
-        $('#payment-button').on('click', function () {
+        $('#payment-button').on('click', function() {
             $('#payment-button').attr('disabled', true);
             stripe
                 .confirmCardSetup('{{ $paymentIntent->client_secret }}', {
@@ -64,7 +64,7 @@
                         },
                     },
                 })
-                .then(function (result) {
+                .then(function(result) {
                     if (result.error) {
                         $('#card-error').text(result.error.message).removeClass('d-none');
                         $('#payment-button').attr('disabled', false);

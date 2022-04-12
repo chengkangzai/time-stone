@@ -6,7 +6,7 @@
 @endpush
 
 @section('content')
-    @if($events->isNotEmpty())
+    @if ($events->isNotEmpty())
         <div class="card mb-4">
             <div class="card-header">
                 {{ __('Your Time Table') }}
@@ -19,21 +19,23 @@
 @endsection
 
 @push('script')
-    @if($events->isNotEmpty())
+    @if ($events->isNotEmpty())
         <script>
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                headerToolbar: {center: 'dayGridMonth,timeGridWeek'}, // buttons for switching between views
+                headerToolbar: {
+                    center: 'dayGridMonth,timeGridWeek'
+                }, // buttons for switching between views
                 initialView: 'timeGridWeek',
                 aspectRatio: 2.3,
             });
 
-            @foreach($events as $event)
-            calendar.addEvent({
-                title: '{{$event->MODID}}',
-                start: '{{$event->TIME_FROM_ISO}}',
-                end: '{{$event->TIME_TO_ISO}}',
-            });
+            @foreach ($events as $event)
+                calendar.addEvent({
+                title: '{{ $event->MODID }}',
+                start: '{{ $event->TIME_FROM_ISO }}',
+                end: '{{ $event->TIME_TO_ISO }}',
+                });
             @endforeach
 
             calendar.render();
