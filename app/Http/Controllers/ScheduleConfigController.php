@@ -51,7 +51,7 @@ class ScheduleConfigController extends Controller
             'intake_code' => 'required|string',
             'grouping' => 'required|string',
             'is_subscribed' => 'sometimes|boolean',
-            'except' => 'sometimes|string',
+            'except' => 'sometimes|array',
         ])
             ->validate();
 
