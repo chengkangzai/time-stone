@@ -29,7 +29,7 @@ abstract class SyncScheduleToCalendar implements ShouldQueue, ShouldBeUnique
         'Web' => 'Web',
     ];
 
-    public function __construct(User $user, ScheduleConfig $config, string $causeBy)
+    protected function __construct(User $user, ScheduleConfig $config, string $causeBy)
     {
         $this->user = $user;
         $this->config = $config;
