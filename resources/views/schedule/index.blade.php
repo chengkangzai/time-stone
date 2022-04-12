@@ -22,6 +22,7 @@
                 <p class="alert alert-danger">
                     {{__('Hi, Looks like you are first time to use the system, please submit your detail')}}
                 </p>
+                @include('partial.error-card')
                 <form action="{{route('scheduleConfig.store')}}" method="POST">
                     @csrf
                     <div class="mb-3">

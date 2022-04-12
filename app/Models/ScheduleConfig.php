@@ -20,7 +20,7 @@ class ScheduleConfig extends Model
     {
         return new Attribute(
             get: fn ($value) => is_null($value) ? [] : explode(',', $value),
-            set: fn ($value) => implode(',', $value),
+            set: fn ($value) => is_null($value) ? null : implode(',', $value)
         );
     }
 
