@@ -28,6 +28,7 @@ class PaymentController extends Controller
     {
         try {
             $action->execute($request->input('payment_id'), $request->input('payment_method'));
+
             return redirect()->route('about')->with('success', __('Payment Successful, Thank you for your donation!'));
         } catch (Exception $ex) {
             return back()->with('error', $ex->getMessage());

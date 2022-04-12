@@ -38,15 +38,15 @@ class HandleMsOAuthCallback
      */
     private function validate(?string $authCode, ?string $expectedState, ?string $providedState): void
     {
-        if (!isset($authCode)) {
+        if (! isset($authCode)) {
             throw new Exception('No auth code provided');
         }
 
-        if (!isset($expectedState)) {
+        if (! isset($expectedState)) {
             throw new Exception('No expected state provided');
         }
 
-        if (!isset($providedState) || $expectedState != $providedState) {
+        if (! isset($providedState) || $expectedState != $providedState) {
             throw new Exception('State does not match');
         }
     }
@@ -87,4 +87,3 @@ class HandleMsOAuthCallback
             ->execute();
     }
 }
-
