@@ -21,7 +21,7 @@
                 <li class="breadcrumb-item active" aria-current="page">{{__('Edit')}}</li>
             </ol>
         </nav>
-        @include('partial.success-card')
+        @include('partial.error-card')
 
         <div class="card">
             <div class="card-body">
@@ -72,9 +72,9 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-check-label" id="is_subscribed">{{__('Sync my schedule weekly')}}</label>
-                        <input type="checkbox" value="{{$scheduleConfig->is_subscribed ? '1':'0' }}"
-                               name="is_subscribed" {{$scheduleConfig->is_subscribed ? 'checked':''}}
+                        <label class="form-check-label" for="is_subscribed">{{__('Sync my schedule weekly')}}</label>
+                        <input type="checkbox" value="{{$scheduleConfig->is_subscribed ? '1': '0' }}"
+                               name="is_subscribed"
                                id="is_subscribed" class="form-check-input"/>
                     </div>
 

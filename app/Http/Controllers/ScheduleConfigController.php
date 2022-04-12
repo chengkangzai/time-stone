@@ -29,9 +29,10 @@ class ScheduleConfigController extends Controller
         $data = Validator::make($request->all(), [
             'intake_code' => 'required|string',
             'grouping' => 'required|string',
-            'is_subscribed' => 'required|boolean',
+            'is_subscribed' => 'sometimes|boolean',
         ]);
-        $request->user()->scheduleConfig()->create($data->validated());
+
+        $request->user()->scheduleConfig()->create($data->validate());
 
         return redirect()->route('scheduleConfig.index')->with('success', __('Schedule config has been setup'));
     }
@@ -49,10 +50,16 @@ class ScheduleConfigController extends Controller
         $data = Validator::make($request->all(), [
             'intake_code' => 'required|string',
             'grouping' => 'required|string',
-            'except' => 'nullable|string',
-            'is_subscribed' => 'required|boolean',
-        ]);
-        $scheduleConfig->update($data->validated());
+            'is_subscribed' => 'sometimes|boolean',
+            'except' => 'sometimes|string',
+        ])
+            ->validate();
+
+        $data = collect($data);
+        $data->getOrPut('except', null);
+        $data->getOrPut('is_subscribed', false);
+
+        $scheduleConfig->update($data->toArray());
 
         return redirect()->route('scheduleConfig.index')->with('success', __('Schedule config has been updated'));
     }
@@ -60,7 +67,7 @@ class ScheduleConfigController extends Controller
     public function syncNow(): RedirectResponse
     {
         $config = Auth::user()->scheduleConfig;
-        if (! auth()->user()->msOauth()->exists()) {
+        if (!auth()->user()->msOauth()->exists()) {
             return redirect()->route('scheduleConfig.index')->withErrors(__('Please link your microsoft account first'));
         }
         AddAPUScheduleToCalenderJob::dispatch(auth()->user(), $config, AddAPUScheduleToCalenderJob::CAUSED_BY['Web']);
