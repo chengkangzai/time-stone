@@ -21,4 +21,12 @@ class MicrosoftOAuth extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Determine if the token has expired, or about to expire.
+     */
+    public function expired(): bool
+    {
+        return $this->tokenExpires < (time() + 500);
+    }
 }

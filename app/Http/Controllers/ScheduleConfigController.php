@@ -2,87 +2,65 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\Schedule\MSScheduleToCalendarJob;
+use App\Actions\Schedule\GetGroupingAndModule;
+use App\Actions\Schedule\GetUserConfigAndEvents;
+use App\Actions\Schedule\StoreScheduleConfig;
+use App\Actions\Schedule\UpdateScheduleConfig;
+use App\Jobs\Schedule\MsScheduleToCalendarJob;
 use App\Models\ScheduleConfig;
 use Auth;
-use Chengkangzai\ApuSchedule\ApuSchedule;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Validator;
 
 class ScheduleConfigController extends Controller
 {
-    public function index(): Factory|View|Application
+    public function index(GetUserConfigAndEvents $action): Factory|View|Application
     {
-        $config = Auth::user()->scheduleConfig;
-        $events = $config ? ApuSchedule::getSchedule($config->intake_code, $config->grouping, $config->except) : collect();
+        [$config, $events] = $action->execute(Auth::user());
 
         return view('schedule.index', compact('config', 'events'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, StoreScheduleConfig $action): RedirectResponse
     {
-        $data = Validator::make($request->all(), [
-            'intake_code' => 'required|string',
-            'grouping' => 'required|string',
-            'is_subscribed' => 'sometimes|boolean',
-        ]);
-
-        $request->user()->scheduleConfig()->create($data->validate());
+        $action->execute($request->all(), auth()->user());
 
         return redirect()->route('scheduleConfig.index')->with('success', __('Schedule config has been setup'));
     }
 
-    public function edit(ScheduleConfig $scheduleConfig): Factory|View|Application
+    public function edit(ScheduleConfig $scheduleConfig, GetGroupingAndModule $action): Factory|View|Application
     {
-        $groupings = ApuSchedule::getGroupings($scheduleConfig->intake_code);
-        $modules = ApuSchedule::getMODID($scheduleConfig->intake_code, $scheduleConfig->grouping);
+        [$groupings, $modules] = $action->execute($scheduleConfig->intake_code, $scheduleConfig->grouping);
 
         return view('schedule.edit', compact('scheduleConfig', 'groupings', 'modules'));
     }
 
-    public function update(Request $request, ScheduleConfig $scheduleConfig): RedirectResponse
+    public function update(Request $request, ScheduleConfig $scheduleConfig, UpdateScheduleConfig $action): RedirectResponse
     {
-        $data = Validator::make($request->all(), [
-            'intake_code' => 'required|string',
-            'grouping' => 'required|string',
-            'is_subscribed' => 'sometimes|boolean',
-            'except' => 'sometimes|array',
-        ])
-            ->validate();
-
-        $data = collect($data);
-        $data->getOrPut('except', null);
-        $data->getOrPut('is_subscribed', false);
-
-        $scheduleConfig->update($data->toArray());
+        $action->execute($request->all(), $scheduleConfig);
 
         return redirect()->route('scheduleConfig.index')->with('success', __('Schedule config has been updated'));
     }
 
-    public function syncNow(): RedirectResponse
+    public function syncNow(GetUserConfigAndEvents $get): RedirectResponse
     {
-        $config = Auth::user()->scheduleConfig;
-        if (! auth()->user()->msOauth()->exists()) {
+        if (auth()->user()->msOauth()->doesntExist()) {
             return redirect()->route('scheduleConfig.index')->withErrors(__('Please link your microsoft account first'));
         }
-        MSScheduleToCalendarJob::dispatch(auth()->user(), $config, MSScheduleToCalendarJob::CAUSED_BY['Web']);
+        MsScheduleToCalendarJob::dispatch(auth()->user(), auth()->user()->scheduleConfig(), MsScheduleToCalendarJob::CAUSED_BY['Web']);
 
         return redirect()->route('scheduleConfig.index')->with('success', __('Schedule has been queued for sync, it will take a few minutes'));
     }
 
-    public function getGrouping(Request $request): JsonResponse
+    public function getGrouping(Request $request, GetGroupingAndModule $action): JsonResponse
     {
-        if ($request->has('intake_code')) {
-            $grouping = ApuSchedule::getGroupings($request->get('intake_code'));
+        [$groupings] = $action->execute($request->get('intake_code'));
 
-            return response()->json($grouping);
-        }
-
-        return response()->json(['error' => 'No intake provided']);
+        return response()->json($groupings);
     }
+
 }

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Support\Facades\Hash;
+use App\Actions\Profile\UpdateUserProfile;
+use Illuminate\Http\Request;
 
 class ProfileController extends Controller
 {
@@ -12,16 +12,9 @@ class ProfileController extends Controller
         return view('auth.profile');
     }
 
-    public function update(ProfileUpdateRequest $request)
+    public function update(Request $request, UpdateUserProfile $action)
     {
-        if ($request->password) {
-            auth()->user()->update(['password' => Hash::make($request->password)]);
-        }
-
-        auth()->user()->update([
-            'name' => $request->name,
-            'email' => $request->email,
-        ]);
+        $action->execute($request->user(), $request->all());
 
         return redirect()->back()->with('success', 'Profile updated.');
     }

@@ -15,13 +15,13 @@ use GuzzleHttp\Exception\GuzzleException;
 use JetBrains\PhpStorm\ArrayShape;
 use Log;
 use Microsoft\Graph\Exception\GraphException;
-use Microsoft\Graph\Graph as MicrosoftGraph;
+use Microsoft\Graph\Graph;
 use Microsoft\Graph\Model;
 use Notification;
 
-class MSScheduleToCalendarJob extends SyncScheduleToCalendar
+class MsScheduleToCalendarJob extends SyncScheduleToCalendar
 {
-    private MicrosoftGraph $graph;
+    private Graph $graph;
 
     /** @var Model\Event[] */
     public array $events;
@@ -30,7 +30,7 @@ class MSScheduleToCalendarJob extends SyncScheduleToCalendar
     public function __construct(User $user, ScheduleConfig $config, string $causeBy)
     {
         parent::__construct($user, $config, $causeBy);
-        $this->graph = (new MicrosoftGraphService())->getGraph($user);
+        $this->graph = MicrosoftGraphService::getGraphWithUser($user);
         $this->timeZone = TimeZoneService::$timeZoneMap['Singapore Standard Time'];
     }
 
@@ -41,7 +41,7 @@ class MSScheduleToCalendarJob extends SyncScheduleToCalendar
 
             $syncedSchedule = ApuSchedule::getSchedule($this->config->intake_code, $this->config->grouping, $this->config->except)
                 ->map(function ($schedule) {
-                    if (! $this->isEventCreatedBefore($schedule)) {
+                    if (!$this->isEventCreatedBefore($schedule)) {
                         $this->syncCalendar($schedule);
 
                         return $schedule;
@@ -60,7 +60,7 @@ class MSScheduleToCalendarJob extends SyncScheduleToCalendar
     protected function getAttendees(array $attendeeAddresses): array
     {
         return collect($attendeeAddresses)
-            ->map(fn ($add) => ['emailAddress' => ['address' => $add], 'type' => 'required'])
+            ->map(fn($add) => ['emailAddress' => ['address' => $add], 'type' => 'required'])
             ->toArray();
     }
 

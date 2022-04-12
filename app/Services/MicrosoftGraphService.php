@@ -2,20 +2,15 @@
 
 namespace App\Services;
 
+use App\Models\MicrosoftOAuth;
 use App\Models\User;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\GenericProvider;
-use Microsoft\Graph\Graph as MicrosoftGraph;
+use Microsoft\Graph\Graph;
 
 class MicrosoftGraphService
 {
-    private TokenService $tokenService;
-
-    public function __construct()
-    {
-        $this->tokenService = new TokenService();
-    }
-
-    public function getOAuthClient(): GenericProvider
+    public static function getOAuthClient(): GenericProvider
     {
         return new GenericProvider([
             'clientId' => config('azure.appId'),
@@ -28,14 +23,36 @@ class MicrosoftGraphService
         ]);
     }
 
-    public function getGraph(User $user): MicrosoftGraph
+    public static function getOrUpdateAccessToken(User $user)
     {
-        $accessToken = $this->tokenService->getAccessToken($user);
+        /** @var MicrosoftOAuth $token */
+        $token = $user->msOauth()->first();
 
-        // Create a Graph client
-        $graph = new MicrosoftGraph();
-        $graph->setAccessToken($accessToken);
+        if (!$token->expired()) {
+            return $token->accessToken;
+        }
 
-        return $graph;
+        try {
+            $oauthClient = static::getOAuthClient();
+
+            $newToken = $oauthClient->getAccessToken('refresh_token', [
+                'refresh_token' => $token->refreshToken,
+            ]);
+
+            $user->msOauth()->update([
+                'accessToken' => $newToken->getToken(),
+                'refreshToken' => $newToken->getRefreshToken(),
+                'tokenExpires' => $newToken->getExpires(),
+            ]);
+
+            return $newToken->getToken();
+        } catch (IdentityProviderException) {
+            return '';
+        }
+    }
+
+    public static function getGraphWithUser(User $user): Graph
+    {
+        return (new Graph())->setAccessToken(static::getOrUpdateAccessToken($user));
     }
 }

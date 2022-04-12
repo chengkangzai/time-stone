@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Chengkangzai\ApuSchedule\ApuSchedule;
+use App\Actions\Schedule\GetUserConfigAndEvents;
 use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(GetUserConfigAndEvents $events)
     {
-        $config = Auth::user()->scheduleConfig;
-        $events = $config ? ApuSchedule::getSchedule($config->intake_code, $config->grouping, $config->except) : collect();
+        [, $events] = $events->execute(Auth::user());
 
         return view('home', compact('events'));
     }

@@ -39,9 +39,4 @@ class ChargeSucceededJob implements ShouldQueue
             }
         }
     }
-
-    private function getCharge(): array
-    {
-        return $this->webhookCall->payload['data']['object'];
-    }
 }
