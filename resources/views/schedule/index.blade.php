@@ -12,7 +12,7 @@
             <li class="breadcrumb-item active" aria-current="page">{{__('Schedule')}}</li>
         </ol>
     </nav>
-
+    @include('partial.error-card')
     @if(!$config)
         <div class="card">
             <div class="card-header">
@@ -22,7 +22,6 @@
                 <p class="alert alert-danger">
                     {{__('Hi, Looks like you are first time to use the system, please submit your detail')}}
                 </p>
-                @include('partial.error-card')
                 <form action="{{route('scheduleConfig.store')}}" method="POST">
                     @csrf
                     <div class="mb-3">
