@@ -159,7 +159,7 @@ class AddAPUScheduleToCalenderJob implements ShouldQueue, ShouldBeUnique
             ->isNotEmpty();
     }
 
-    public function getEventBodyContent($schedule): string
+    private function getEventBodyContent($schedule): string
     {
         return collect("Hi, {$this->user->name}, you have a class of $schedule->MODULE_NAME.")
             ->add("The class is from $schedule->TIME_FROM to $schedule->TIME_TO at $schedule->ROOM ")
