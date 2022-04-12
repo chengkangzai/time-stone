@@ -33,6 +33,18 @@
                             </div>
                             @enderror
                         </div>
+                        <div class="mb-4">
+                            <label class="form-check-label" for="remember">
+                                {{ __('Remember Me') }}
+                            </label>
+                            <input class="form-check-input @error('remember') is-invalid @enderror" type="checkbox"
+                                   name="remember" placeholder="{{ __('Remember me') }}" id="remember">
+                            @error('remember')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                            @enderror
+                        </div>
                         <div class="row">
                             <div class="col-6">
                                 <button class="btn btn-primary px-4" type="submit">{{ __('Login') }}</button>
