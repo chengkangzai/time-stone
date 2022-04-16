@@ -7,6 +7,7 @@ use App\Actions\Schedule\GetUserConfigAndEvents;
 use App\Actions\Schedule\StoreScheduleConfig;
 use App\Actions\Schedule\UpdateScheduleConfig;
 use App\Jobs\Schedule\MsScheduleToCalendarJob;
+use App\Jobs\Schedule\SyncScheduleToCalendar;
 use App\Models\ScheduleConfig;
 use Auth;
 use Illuminate\Contracts\Foundation\Application;
@@ -51,7 +52,7 @@ class ScheduleConfigController extends Controller
         if (auth()->user()->msOauth()->doesntExist()) {
             return redirect()->route('scheduleConfig.index')->withErrors(__('Please link your microsoft account first'));
         }
-        MsScheduleToCalendarJob::dispatch(auth()->user(), auth()->user()->scheduleConfig(), MsScheduleToCalendarJob::CAUSED_BY['Web']);
+        MsScheduleToCalendarJob::dispatch(auth()->user(), auth()->user()->scheduleConfig, SyncScheduleToCalendar::CAUSED_BY['Web']);
 
         return redirect()->route('scheduleConfig.index')->with('success', __('Schedule has been queued for sync, it will take a few minutes'));
     }

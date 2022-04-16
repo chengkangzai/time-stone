@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\Schedule\MsScheduleToCalendarJob;
+use App\Jobs\Schedule\SyncScheduleToCalendar;
 use App\Models\ScheduleConfig;
 use Illuminate\Console\Command;
 
@@ -25,7 +26,7 @@ class SyncScheduleToCalendarCommand extends Command
                 $this->output->progressStart($schedules->count());
             })
             ->each(function ($config) {
-                MsScheduleToCalendarJob::dispatch($config->user, $config, MsScheduleToCalendarJob::CAUSED_BY['Console']);
+                MsScheduleToCalendarJob::dispatch($config->user, $config, SyncScheduleToCalendar::CAUSED_BY['Console']);
                 $this->output->progressAdvance();
             })
             ->tap(function () {
