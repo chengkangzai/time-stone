@@ -20,9 +20,13 @@ class SyncScheduleToCalendarCommand extends Command
 
     public function handle(): int
     {
-        $this->info('Starting sync schedule to calendar');
-        ScheduleConfig::with('user')->whereHas('user.msOauth')->subscribed()->get()
+        ScheduleConfig::query()
+            ->with('user')
+            ->whereHas('user.msOauth')
+            ->subscribed()
+            ->get()
             ->tap(function ($schedules) {
+                $this->info('Starting sync schedule to calendar');
                 $this->output->progressStart($schedules->count());
             })
             ->each(function ($config) {
