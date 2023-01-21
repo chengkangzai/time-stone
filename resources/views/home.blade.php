@@ -32,9 +32,9 @@
 
             @foreach ($events as $event)
                 calendar.addEvent({
-                title: '{{ $event->MODID }}',
-                start: '{{ $event->TIME_FROM_ISO }}',
-                end: '{{ $event->TIME_TO_ISO }}',
+                    title: '{{ $event->MODID }}',
+                    start: '{{ $event->TIME_FROM_ISO }}',
+                    end: '{{ $event->TIME_TO_ISO }}',
                 });
             @endforeach
 
